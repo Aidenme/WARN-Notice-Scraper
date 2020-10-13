@@ -49,10 +49,13 @@ class MyTable:
         self.raw_table = site_table
         self.raw_table_column_names = None
         self.company_column = None
-        self.company_column_eq = 0
+        self.company_column_index = 0
         self.effective_date_column = None
+        self.effective_date_column_index = None
         self.location_column = None
+        self.location_column_index = 0
         self.worker_count_column = None
+        self.worker_count_column_index = None
         self.final_table = []
 
     def print_raw_table(self):
@@ -63,7 +66,7 @@ class MyTable:
         print(self.raw_table[0])
 
     def clean_column_company(self):
-        company_column_raw = self.get_column(self.company_column_eq)
+        company_column_raw = self.get_column(self.company_column_index)
         #remove first element from company column. This is the column name and not a company name so must be removed.
         company_column_raw = company_column_raw[1:]
         company_column_clean = []
@@ -92,6 +95,18 @@ class MyTable:
             location_clean.append('\n'.join(address))
         self.company_column = company_column_clean
         self.location_column = location_clean
+
+    def clean_column_effective_date(self):
+        effective_date_column_raw = self.get_column(self.effective_date_column_index)
+        effective_date_column_clean = []
+
+    def clean_column_location(self):
+        #This is handled in clean_column_company()
+        pass
+
+    def clean_column_worker_count(self):
+        column_worker_count_raw = self.get_column(self.worker_count_column_index)
+        worker_count_column_clean = []
 
     def get_column(self, column_index):
         column = []
@@ -158,8 +173,6 @@ def create_csv_file():
 fl_site = Site()
 fl_site.get_site_data()
 fl_table = MyTable(fl_site.full_table)
-#fl_table.print_raw_table()
-#fl_table.set_raw_table_column_names()
 fl_table.clean_column_company()
 fl_table.create_final_table()
 fl_csv = CSVMaster(fl_table)
