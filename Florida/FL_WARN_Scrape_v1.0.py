@@ -53,7 +53,7 @@ class MyTable:
         self.effective_date_column = None
         self.location_column = None
         self.worker_count_column = None
-        self.final_table = None
+        self.final_table = []
 
     def print_raw_table(self):
         for row in self.raw_table:
@@ -99,6 +99,23 @@ class MyTable:
             column.append(row[column_index])
         return column
 
+    def create_final_table(self):
+        table_row = []
+        table_row.append(self.company_column[0])
+        table_row.append(self.location_column[0])
+        self.final_table.append(table_row)
+
+class CSVMaster:
+    def __init__(self, table):
+        self.table = table
+        self.column_names = ["Company", "Location", "Effective Date", "Number of Workers"]
+
+    def create_csv_file(self):
+        with open('FL_WARN_Notice.csv', mode='w+') as csv_file:
+            warn_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            warn_writer.writerow(self.column_names)
+            for row in self.table.final_table:
+                warn_writer.writerow(row)
 
 def clean_row(row_list):
     row_list = [clean_row_item(row) for row in row_list]
@@ -141,4 +158,6 @@ fl_table = MyTable(fl_site.full_table)
 #fl_table.print_raw_table()
 #fl_table.set_raw_table_column_names()
 fl_table.clean_column_company()
-print(fl_table.location_column)
+fl_table.create_final_table()
+fl_csv = CSVMaster(fl_table)
+fl_csv.create_csv_file()
