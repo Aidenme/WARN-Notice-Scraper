@@ -100,7 +100,8 @@ class MyTable:
         effective_date_column_raw = self.get_column(self.effective_date_column_index)
         effective_date_column_clean = []
         for row in effective_date_column_raw:
-            date_range = re.sub("<td>|</td>|<br/>|<i>|</i>", "", str(row))
+            print(row)
+            date_range = re.sub("<td>|</td>|<br/>|<i>| </i>", "", str(row))
             effective_date_column_clean.append(date_range)
         self.effective_date_column = effective_date_column_clean
 
