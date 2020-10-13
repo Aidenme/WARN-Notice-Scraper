@@ -64,29 +64,40 @@ class MyTable:
 
     def clean_column_company(self):
         company_column_raw = self.get_column(self.company_column_eq)
+        #remove first element from company column. This is the column name and not a company name so must be removed.
+        company_column_raw = company_column_raw[1:-1]
         company_column_clean = []
         location_clean = []
         for row in company_column_raw:
             split_list = str(row).split('>')
-            print(split_list)
             #The company name is always the third element in the list after a split along the > part of the html syntax.
             company_name = split_list[2]
             company_name = company_name.replace('</b', '')
             company_name = company_name.replace('&amp;', '&')
             company_column_clean.append(company_name)
             #Getting the location. Might as well since it appears in the same data cell as the company name.
-
-        for row in company_column_clean:
-            pass
+            address = []
+            address_line_one = split_list[4]
+            address_line_two = split_list[5]
+            address_line_three = split_list[6]
+            address_line_one = address_line_one.replace('<br/', '')
+            address_line_two = address_line_two.replace('<br/', '')
+            address_line_three = address_line_three.replace('</td', '')
+            address.append(address_line_one)
+            #2nd address line is optional. It won't be part of the address if it doesn't exist.
+            if address_line_two != '':
+                address.append(address_line_two)
+            address.append(address_line_three)
+            #Join individual address lines into one address string.
+            location_clean.append('\n'.join(address))
+        self.company_column = company_column_clean
+        self.location_column = location_clean
 
     def get_column(self, column_index):
         column = []
         for row in self.raw_table:
             column.append(row[column_index])
         return column
-
-
-
 
 
 def clean_row(row_list):
@@ -130,3 +141,4 @@ fl_table = MyTable(fl_site.full_table)
 #fl_table.print_raw_table()
 #fl_table.set_raw_table_column_names()
 fl_table.clean_column_company()
+print(fl_table.location_column)
