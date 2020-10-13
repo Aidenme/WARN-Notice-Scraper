@@ -65,7 +65,7 @@ class MyTable:
     def clean_column_company(self):
         company_column_raw = self.get_column(self.company_column_eq)
         #remove first element from company column. This is the column name and not a company name so must be removed.
-        company_column_raw = company_column_raw[1:-1]
+        company_column_raw = company_column_raw[1:]
         company_column_clean = []
         location_clean = []
         for row in company_column_raw:
@@ -100,10 +100,13 @@ class MyTable:
         return column
 
     def create_final_table(self):
-        table_row = []
-        table_row.append(self.company_column[0])
-        table_row.append(self.location_column[0])
-        self.final_table.append(table_row)
+        i = 0
+        while i < len(self.company_column):
+            table_row = []
+            table_row.append(self.company_column[i])
+            table_row.append(self.location_column[i])
+            self.final_table.append(table_row)
+            i += 1
 
 class CSVMaster:
     def __init__(self, table):
