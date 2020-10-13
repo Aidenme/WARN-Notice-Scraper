@@ -146,41 +146,6 @@ class CSVMaster:
             for row in self.table.final_table:
                 warn_writer.writerow(row)
 
-def clean_row(row_list):
-    row_list = [clean_row_item(row) for row in row_list]
-    row_list[5] = clean_download_link(row_list[5])
-    return row_list
-
-def clean_row_item(item):
-    item = str(item)
-    item = re.sub("<td>|</td>|<b>|</b>|<i>|</i>", "", item)
-    item = re.sub("<br/>", "\n", item)
-    return item
-
-def clean_download_link(item):
-    link_start = "http://reactwarn.floridajobs.org"
-    item = re.sub('<a href=|"|>Download</a>', "", item)
-    item = link_start + item
-    return item
-
-def clean_raw_list(list):
-    cleaned_rows = []
-    for row in list:
-        cleaned_rows.append(clean_row(row))
-    return cleaned_rows
-
-def create_csv_file():
-    raw_list_rows = get_site_data()
-    final_list = clean_raw_list(raw_list_rows)
-    column_names = ['Company Name', 'Layoff Date', 'Employees Affected']
-    with open('FL_WARN_Notice.csv', mode='w+') as csv_file:
-        warn_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        warn_writer.writerow(column_names)
-        for row in final_list:
-            warn_writer.writerow(row)
-
-#create_csv_file()
-
 fl_site = Site()
 fl_site.get_site_data()
 fl_table = MyTable(fl_site.full_table)
