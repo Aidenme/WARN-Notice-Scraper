@@ -64,7 +64,16 @@ class MyTable:
 
     def clean_column_company(self):
         company_column_raw = self.get_column(self.company_column_eq)
+        company_column_clean = []
+        location_clean = []
         for row in company_column_raw:
+            split_list = str(row).split('>')
+            #The company name is always the third element in the list after a split along the > part of the html syntax
+            company_name = split_list[2]
+            company_name = company_name.replace('</b', '')
+            company_name = company_name.replace('&amp;', '&')
+            company_column_clean.append(company_name)
+        for row in company_column_clean:
             print(row)
 
     def get_column(self, column_index):
@@ -72,6 +81,7 @@ class MyTable:
         for row in self.raw_table:
             column.append(row[column_index])
         return column
+
 
 
 
