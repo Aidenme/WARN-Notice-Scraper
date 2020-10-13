@@ -8,7 +8,7 @@ class Site:
         self.full_table = None
         self.page_url = "http://reactwarn.floridajobs.org/WarnList/Records?year=2020&page="
         self.start_page = 1
-        self.total_pages = 3
+        self.total_pages = 13
 
     def get_site_data(self):
         site_data_list = []
