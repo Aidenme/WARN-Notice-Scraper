@@ -8,7 +8,7 @@ class Site:
         self.full_table = None
         self.page_url = "http://reactwarn.floridajobs.org/WarnList/Records?year=2020&page="
         self.start_page = 1
-        self.total_pages = 1
+        self.total_pages = 3
 
     def get_site_data(self):
         site_data_list = []
@@ -20,7 +20,7 @@ class Site:
             pages_url = start_page_url + str(starting_page)
             soup = self.get_soup(pages_url)
             site_data_list = site_data_list + self.get_rows_from_page(soup)
-            print(starting_page)
+            print("Got data from website page " + str(starting_page))
             starting_page += 1
 
         self.full_table = site_data_list
@@ -33,10 +33,8 @@ class Site:
     def get_rows_from_page(self, soup):
         all_rows = []
         table_rows = soup.tbody.find_all('tr')
-        table_header = soup.thead.find_all('th')
-        all_rows.append(table_header)
         for row in table_rows:
-            table_data = row.find_all(['td', 'th'])
+            table_data = row.find_all('td')
             all_rows.append(table_data)
         return all_rows
 
@@ -51,24 +49,26 @@ class MyTable:
         self.company_column = None
         self.company_column_index = 0
         self.effective_date_column = None
-        self.effective_date_column_index = None
+        self.effective_date_column_index = 2
         self.location_column = None
         self.location_column_index = 0
         self.worker_count_column = None
-        self.worker_count_column_index = None
+        self.worker_count_column_index = 3
         self.final_table = []
+
+    def clean_data(self):
+        self.clean_column_company()
+        self.clean_column_effective_date()
+        self.clean_column_location()
+        self.clean_column_worker_count()
 
     def print_raw_table(self):
         for row in self.raw_table:
             print(row)
 
-    def set_raw_table_column_names(self):
-        print(self.raw_table[0])
-
     def clean_column_company(self):
         company_column_raw = self.get_column(self.company_column_index)
         #remove first element from company column. This is the column name and not a company name so must be removed.
-        company_column_raw = company_column_raw[1:]
         company_column_clean = []
         location_clean = []
         for row in company_column_raw:
@@ -99,14 +99,23 @@ class MyTable:
     def clean_column_effective_date(self):
         effective_date_column_raw = self.get_column(self.effective_date_column_index)
         effective_date_column_clean = []
+        for row in effective_date_column_raw:
+            date_range = re.sub("<td>|</td>|<br/>|<i>|</i>", "", str(row))
+            effective_date_column_clean.append(date_range)
+        self.effective_date_column = effective_date_column_clean
 
     def clean_column_location(self):
         #This is handled in clean_column_company()
         pass
 
     def clean_column_worker_count(self):
-        column_worker_count_raw = self.get_column(self.worker_count_column_index)
+        worker_count_column_raw = self.get_column(self.worker_count_column_index)
         worker_count_column_clean = []
+        for row in worker_count_column_raw:
+            worker_count = re.sub("<td>|</td>", "", str(row))
+            worker_count_column_clean.append(worker_count)
+        self.worker_count_column = worker_count_column_clean
+
 
     def get_column(self, column_index):
         column = []
@@ -119,14 +128,16 @@ class MyTable:
         while i < len(self.company_column):
             table_row = []
             table_row.append(self.company_column[i])
+            table_row.append(self.effective_date_column[i])
             table_row.append(self.location_column[i])
+            table_row.append(self.worker_count_column[i])
             self.final_table.append(table_row)
             i += 1
 
 class CSVMaster:
     def __init__(self, table):
         self.table = table
-        self.column_names = ["Company", "Location", "Effective Date", "Number of Workers"]
+        self.column_names = ["Company", "Effective Date", "Location", "Number of Workers"]
 
     def create_csv_file(self):
         with open('FL_WARN_Notice.csv', mode='w+') as csv_file:
@@ -174,6 +185,7 @@ fl_site = Site()
 fl_site.get_site_data()
 fl_table = MyTable(fl_site.full_table)
 fl_table.clean_column_company()
+fl_table.clean_data()
 fl_table.create_final_table()
 fl_csv = CSVMaster(fl_table)
 fl_csv.create_csv_file()
