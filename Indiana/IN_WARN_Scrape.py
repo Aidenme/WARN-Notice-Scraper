@@ -73,45 +73,28 @@ class MyTable:
             print(row)
 
     def print_column(self, column):
-        for row in column:
+        column_to_print = eval("self." + column)
+        for row in column_to_print:
             print(row)
 
     def get_data_between_tags(self, row_string):
-        list = re.split("<.+>", row_string)
-        print(list)
+        list = re.split("<[^<>]+>", row_string)
+        clean_list = []
+        for row in list:
+            row = re.sub(r"\n|\t|\xa0", "", row)
+            row = row.replace("&amp;", "and")
+            if row != '':
+                clean_list.append(row)
+        return clean_list
 
     def clean_column_company(self):
         company_column_raw = self.get_column(self.company_column_index)
         company_column_clean = []
 
-        def clean_title(link):
-            name_start = link.rfind(">")
-            link = link[name_start + 1:]
-            return link
-
         for row in company_column_raw:
-            string_row = str(row)
-            if "<p>" in string_row:
-                name_start = string_row.find("<p>")
-                name_end = string_row.find("</p>")
-                name = string_row[name_start + 3:name_end]
-                if "<br/>" in name:
-                    name_end = name.find("<br/>")
-                    name = name[:name_end]
-                if "href" in name:
-                    name_start = name.find('"_self">')
-                    name_end = name.find("</a>")
-                    name = name[name_start + 8:name_end]
-                if "title" in name:
-                    name = clean_title(name)
-            else:
-                name_start = string_row.find('"_self">')
-                name_end = string_row.find("</a>")
-                name = string_row[name_start + 8:name_end]
-                if "title" in name:
-                    name = clean_title(name)
-            name = name.replace("&amp;", "&")
-            company_column_clean.append(name)
+            clean_row_list = self.get_data_between_tags(str(row))
+            clean_row = clean_row_list[0]
+            company_column_clean.append(clean_row)
 
         self.company_column = company_column_clean
 
@@ -128,36 +111,27 @@ class MyTable:
     def clean_column_location(self):
         location_column_raw = self.get_column(self.location_column_index)
         location_column_clean = []
-        name = "name to fill"
+
         for row in location_column_raw:
-            get_data_between_tags(row)
-        for row in location_column_raw:
-            name = str(row).replace("&amp;", "and")
-            name = name.replace("<br/>", ", ")
-            name = name.replace("<td>", "")
-            name = name.replace("</td>", "")
-            name = name.replace("\n", "")
-            name = name.replace("\t", "")
-            name = name.replace(",,", ",")
-            name = name.replace("and,", "and")
-            name = name.replace("<p>", "")
-            name = name.replace("</p>", "")
-            location_column_clean.append(name)
+            clean_row_list = self.get_data_between_tags(str(row))
+            clean_row = clean_row_list[0]
+            location_column_clean.append(clean_row)
+
         self.location_column = location_column_clean
 
     def clean_column_worker_count(self):
         worker_count_column_raw = self.get_column(self.worker_count_column_index)
         worker_count_column_clean = []
-        name = "name to fill"
+
         for row in worker_count_column_raw:
-            name = str(row).replace("<td>", "")
-            name = name.replace("</td>", "")
-            name = name.replace("<br/>", ", ")
-            name = name.replace("\n", "")
-            name = name.replace("\t", "")
-            name = name.replace("<p>", "")
-            name = name.replace("</p>", "")
-            worker_count_column_clean.append(name)
+            clean_row_list = self.get_data_between_tags(str(row))
+            if len(clean_row_list) > 1:
+                clean_row = clean_row_list[0] + " " + clean_row_list[1]
+            else:
+                clean_row = row[0]
+            print(clean_row)
+            worker_count_column_clean.append(clean_row)
+
         self.worker_count_column = worker_count_column_clean
 
 
@@ -199,7 +173,9 @@ in_site = Site()
 in_site.get_site_data()
 #in_site.print_site_data()
 in_table = MyTable(in_site.full_table)
-in_table.clean_column_company()
+in_table.clean_column_worker_count()
+#in_table.print_column("worker_count_column")
+#in_table.get_data_between_tags('<td><a href="/dwd/files/AAA_Sales_Engineering_Inc.pdf" target="_self">')
 #in_table.clean_data()
 #in_table.create_final_table()
 #in_csv = CSVMaster(in_table)
