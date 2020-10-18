@@ -55,11 +55,11 @@ class MyTable:
         self.company_column = None
         self.company_column_index = 0
         self.effective_date_column = None
-        self.effective_date_column_index = 2
+        self.effective_date_column_index = 4
         self.location_column = None
-        self.location_column_index = 0
+        self.location_column_index = 1
         self.worker_count_column = None
-        self.worker_count_column_index = 3
+        self.worker_count_column_index = 2
         self.final_table = []
 
     def clean_data(self):
@@ -75,6 +75,10 @@ class MyTable:
     def print_column(self, column):
         for row in column:
             print(row)
+
+    def get_data_between_tags(self, row_string):
+        list = re.split("<.+>", row_string)
+        print(list)
 
     def clean_column_company(self):
         company_column_raw = self.get_column(self.company_column_index)
@@ -110,28 +114,50 @@ class MyTable:
             company_column_clean.append(name)
 
         self.company_column = company_column_clean
-        for row in self.company_column:
-            print(row)
 
     def clean_column_effective_date(self):
         effective_date_column_raw = self.get_column(self.effective_date_column_index)
         effective_date_column_clean = []
+        name = "value to fill"
         for row in effective_date_column_raw:
-            print(row)
-            date_range = re.sub("<td>|</td>|<br/>|<i>| </i>", "", str(row))
-            effective_date_column_clean.append(date_range)
+            name = str(row).replace("<td>", "")
+            name = name.replace("</td>", "")
+            effective_date_column_clean.append(name)
         self.effective_date_column = effective_date_column_clean
 
     def clean_column_location(self):
-        #This is handled in clean_column_company()
-        pass
+        location_column_raw = self.get_column(self.location_column_index)
+        location_column_clean = []
+        name = "name to fill"
+        for row in location_column_raw:
+            get_data_between_tags(row)
+        for row in location_column_raw:
+            name = str(row).replace("&amp;", "and")
+            name = name.replace("<br/>", ", ")
+            name = name.replace("<td>", "")
+            name = name.replace("</td>", "")
+            name = name.replace("\n", "")
+            name = name.replace("\t", "")
+            name = name.replace(",,", ",")
+            name = name.replace("and,", "and")
+            name = name.replace("<p>", "")
+            name = name.replace("</p>", "")
+            location_column_clean.append(name)
+        self.location_column = location_column_clean
 
     def clean_column_worker_count(self):
         worker_count_column_raw = self.get_column(self.worker_count_column_index)
         worker_count_column_clean = []
+        name = "name to fill"
         for row in worker_count_column_raw:
-            worker_count = re.sub("<td>|</td>", "", str(row))
-            worker_count_column_clean.append(worker_count)
+            name = str(row).replace("<td>", "")
+            name = name.replace("</td>", "")
+            name = name.replace("<br/>", ", ")
+            name = name.replace("\n", "")
+            name = name.replace("\t", "")
+            name = name.replace("<p>", "")
+            name = name.replace("</p>", "")
+            worker_count_column_clean.append(name)
         self.worker_count_column = worker_count_column_clean
 
 
@@ -141,7 +167,7 @@ class MyTable:
             try:
                 column.append(row[column_index])
             except:
-                print("Row could not be added to column")
+                pass
         return column
 
     def create_final_table(self):
@@ -154,14 +180,16 @@ class MyTable:
             table_row.append(self.worker_count_column[i])
             self.final_table.append(table_row)
             i += 1
+        self.final_table
 
 class CSVMaster:
     def __init__(self, table):
         self.table = table
+        self.state = "IN"
         self.column_names = ["Company", "Effective Date", "Location", "Number of Workers"]
 
     def create_csv_file(self):
-        with open('FL_WARN_Notice.csv', mode='w+') as csv_file:
+        with open(self.state + '_WARN_Notice.csv', mode='w+') as csv_file:
             warn_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             warn_writer.writerow(self.column_names)
             for row in self.table.final_table:
@@ -172,9 +200,7 @@ in_site.get_site_data()
 #in_site.print_site_data()
 in_table = MyTable(in_site.full_table)
 in_table.clean_column_company()
-#fl_table = MyTable(fl_site.full_table)
-#fl_table.clean_column_company()
-#fl_table.clean_data()
-#fl_table.create_final_table()
-#fl_csv = CSVMaster(fl_table)
-#fl_csv.create_csv_file()
+#in_table.clean_data()
+#in_table.create_final_table()
+#in_csv = CSVMaster(in_table)
+#in_csv.create_csv_file()
